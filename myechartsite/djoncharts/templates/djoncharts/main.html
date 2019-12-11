@@ -1,0 +1,647 @@
+{% load static %} 
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <script src="{% static 'djoncharts/js/jquery.js'%}"></script>
+    <link href="{% static 'djoncharts/css/semantic.min.css' %}" rel="stylesheet">
+    <link href="{% static 'djoncharts/css/range.css' %}" rel="stylesheet">
+    <script src="{% static 'djoncharts/js/echarts.js' %}"></script>
+    <script src="{% static 'djoncharts/js/echarts-gl.js' %}"></script>
+    <script type="text/javascript" src="{% static 'djoncharts/js/semantic.min.js'%}"></script>
+    <script type="text/javascript" src="{% static 'djoncharts/js/range.js'%}"></script>
+    <script type="text/javascript" src="{% static 'djoncharts/js/spin.min.js'%}"></script>
+</head>
+</html>
+<body>
+
+
+<div class="ui teal large secondary inverted pointing three item menu", style="height: 100px;">
+  <a class="item", style="font-size: 40px;">主动脉分割与特征提取系统</a>
+</div>
+
+<div class="ui modal" id="mymodal" style="width:300px; height:300px;">
+  <i class="close icon"></i>
+  <div class="header" id = "modalHeader" style="text-align: center;">截面图像</div>
+  <div class="content">
+    <img class="ui medium bordered image" id='SectImg' src="/static/djoncharts/imgs/IMG-0001-00069.jpg" align="middle">
+  </div>
+</div>
+
+
+<div class="ui top attached tabular menu", id='menu'>
+    <div id="myspin"></div>
+    <div class="active item", data-tab="0">病例预览</div>
+    <div class="item", data-tab="1">主动脉分割</div>
+    <div class="item", data-tab="2">主动脉特征提取</div>
+</div>
+
+
+
+<div data-tab="0" class="ui bottom attached active tab segment">
+  <div class="ui segment">
+    <div class="ui two column stackable grid container">
+        <div class="column", style="width: 300px; height: 800px">
+            <div class="ui middle aligned animated divided list", id='folders'>
+              <!--
+              {% for folder, num in dicom_folders %}
+                <div class="item", id={{folder}}>
+                  <i class='heartbeat icon'></i>
+                  <div class="content" style="height: 30px">
+                    <div class="header">{{folder}}</div>
+                    <p style="display: none;">{{num}}<p>
+                  </div>
+                </div>
+              {% endfor %}
+              -->
+            </div>
+
+            <div class="ui pagination menu">
+              <a class="item">
+                1
+              </a>
+              <a class="item">
+                2
+              </a>
+              <a class="item">
+                3
+              </a>
+              <a class="item">
+                4
+              </a>
+              <a class="item">
+                5
+              </a>
+            </div>
+        </div>
+        <div class="column", style="width: 500px;">
+            <div id='chart0' class="ui placeholder segment">
+                <img class="ui large bordered image" id='CTimg0' src="/static/djoncharts/imgs/IMG-0001-00069.jpg", align="middle">
+            </div>
+
+            <div class="ui segment">
+                <div class="ui range" id="range-3"></div>
+                <br>
+                <p>
+                    帧号: <span id="display-3"></span>
+                </p>
+            </div>
+
+            <button class="ui secondary fluid button" id="button">分割</button>
+        </div>
+    </div>
+  </div>
+</div>
+
+
+<div data-tab="1" class="ui bottom attached tab segment">
+  <div class="ui five column grid">
+        <div class="column" style="width: 200px;">
+
+        </div>
+
+        <div class="column" style="width: 400px;">
+            <div class="ui placeholder segment">
+                <img class="ui large bordered image" id='CTimg1' src="/static/djoncharts/imgs/IMG-0001-00069.jpg", align="middle">
+                <h3 style="width:340px;height:40px;text-align: center;">2D逐帧原图</h3>
+            </div>
+        </div>
+
+        <div class="column" style="width: 400px;">
+            <div class="ui placeholder segment">
+                <img class="ui large bordered image" id='HMImg' src="/static/djoncharts/imgs/IMG-0001-00069.jpg", align="middle">
+                <h3 style="width:340px;height:40px;text-align: center;">2D分割热图</h3>
+            </div>
+        </div>
+
+        <div class="column" style="width: 400px;">
+            <div class="ui placeholder segment">
+              <img class="ui large bordered image" id='SegImg' src="/static/djoncharts/imgs/IMG-0001-00069.jpg", align="middle">
+                <h3 style="width:340px;height:40px;text-align: center;">2D逐帧分割结果</h3>
+            </div>
+        </div>
+  </div>
+
+    <div class="ui one column stackable grid container" style="width:600px; height:40px;">
+      <div class="ui big range" id="range-4"></div>
+      <br>
+      <p>
+          帧号: <span id="display-4"></span>
+      </p>
+    </div>
+</div>
+
+<div data-tab="2" class="ui bottom attached tab segment" style="width:3100px; height:1200px;">
+    <div class="ui horizontal segment" style="width:1900px; height:1100px;">
+        <div class="ui three column grid" style="width:1900px; height:1000px;">
+            <div class="column" style="width:540px;height:540px;">
+              <div class="ui placeholder segment" style="width:450px;height:430px;">
+                <div id='chart1' class="ui segment" style="width:420px;height:330px;"></div>
+                <!--div class="ui input", style="width:210px;height:37px;"></div-->
+                <h3 style="width:420px;height:10px;text-align: center;">3D分割结果</h3>
+              </div>
+              <div class="ui input", style="width:210px;height:37px;"></div>
+              <div style="width:450px;height:20px;">
+                  <button class="ui secondary fluid button" id="button_centerline", onclick="get_centerline()">获取中心线</button>
+              </div>
+            </div>
+
+            <div class="column" style="width:540px;height:420px;">
+              <div class="ui placeholder segment" style="width:450px;height:430px;">
+                <div id='chart2' class="ui segment" style="width:420px;height:330px;"></div>
+                <h3 style="width:420px;height:10px;text-align: center;">主动脉中心线</h3>
+              </div>
+                <div class="ui input", id="begin_point", style="width:224px;height:40px;">
+                  <input type="text" placeholder="起始点">
+                </div>
+
+                <div class="ui input", id="end_point", style="width:224px;height:40px;">
+                  <input type="text" placeholder="终止点">
+                </div>
+                <div style="width:450px;height:40px;">
+                  <button class="ui secondary fluid button" id="button_section", onclick="get_direction()">获取大血管走向</button>
+                </div>
+            </div>
+
+            <div class="column" style="width:360px;height:400px;">
+              <div class="ui placeholder segment" style="width:450px;height:430px;">
+                <div id='chart3' class="ui segment" style="width:420px;height:330px;"></div>
+                <h3 style="width:420px;height:10px;text-align: center;">主动脉走向</h3>
+              </div>
+                <div class="ui input", style="width:210px;height:37px;">
+                </div>
+                <div style="width:450px;height:40px;">
+                  <button class="ui secondary fluid button" id="button_section", onclick="get_section()">获取截面</button>
+                </div>
+
+            </div>
+
+            <div class="column" style="width:800px;height:500px;">
+              <div class="ui placeholder segment" style="width:750px;height:480px;">
+                <div id='chart4' class="ui segment" style="width:720px;height:400px;"></div>
+                <h3 style="text-align: center;">形态特征</h3>
+              </div>
+            </div>
+
+            <div class="column" style="width:800px;height:500px;">
+              <div class="ui placeholder segment" style="width:750px;height:480px;">
+                <div id='chart5' class="ui segment" style="width:720px;height:400px;"></div>
+                <h3 style="text-align: center;">影像值特征</h3>
+              </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+    <script type="text/javascript">
+
+
+
+        // 基于准备好的dom，初始化echarts实例
+        var myChart = echarts.init(document.getElementById('chart1'));
+        var centerChart = echarts.init(document.getElementById('chart2'))
+        var sectionChart = echarts.init(document.getElementById('chart3'))
+        var axisChart = echarts.init(document.getElementById('chart4'))
+        var valueChart = echarts.init(document.getElementById('chart5'))
+
+        var meta_folder = '003';
+
+        /****Ajax加载时的旋转图标***/
+        var opts = {
+                lines: 13, // 花瓣数目
+                length: 20, // 花瓣长度
+                width: 10, // 花瓣宽度
+                radius: 30, // 花瓣距中心半径
+                corners: 1, // 花瓣圆滑度 (0-1)
+                rotate: 0, // 花瓣旋转角度
+                direction: 1, // 花瓣旋转方向 1: 顺时针, -1: 逆时针
+                color: '#5882FA', // 花瓣颜色
+                speed: 1, // 花瓣旋转速度
+                trail: 60, // 花瓣旋转时的拖影(百分比)
+                shadow: false, // 花瓣是否显示阴影
+                hwaccel: false, //spinner 是否启用硬件加速及高速旋转
+                className: 'spinner', // spinner css 样式名称
+                zIndex: 2e9, // spinner的z轴 (默认是2000000000)
+            };
+        var spinner = new Spinner(opts);
+
+        $(document).ready(function(){
+        // Semantic UI Range
+
+        var val = 0;
+        var folder;
+        var file_num = 100;
+
+        $('#button').click(function(value){
+          console.log(val);
+          //document.getElementById('SegImg').src='/static/djoncharts/masks/' + meta_folder + '/' + ('000000' + val.toString()).slice(-6) + '.jpg';
+          $.getJSON('/static/djoncharts/masks/' + meta_folder + '/data.json', function (data) {
+                console.log(data);
+                var symbolSize = 0.5;
+                option = {
+                    grid3D: {},
+                     xAxis3D: {},
+                    yAxis3D: {},
+                    zAxis3D: {},
+                    dataset: {
+                        dimensions: [
+                            'X',
+                            'Y',
+                            'Z',
+                        ],
+                        source: data
+                    },
+                    series: [
+                        {
+                            type: 'scatter3D',
+                            symbolSize: symbolSize,
+                            encode: {
+                                x: 'X',
+                                y: 'Y',
+                                z: 'Z',
+                                //tooltip: [0, 1, 2, 3, 4]
+                            }
+                        }
+                    ]
+                };
+                myChart.setOption(option);
+            
+            });
+        })
+
+        $('#range-3').range({
+          min: 1,
+          max: file_num,
+          start: 1,
+          onChange: function(value) {
+            val = value;
+            $('#display-3').html(value);
+            document.getElementById('CTimg0').src='/static/djoncharts/jpgs/' + meta_folder + '/' + ('00000' + value.toString()).slice(-5) + '.jpg';
+          }
+        });
+
+        $('#range-4').range({
+          min: 1,
+          max: file_num,
+          start: 1,
+          onChange: function(value) {
+            val = value;
+            $('#display-4').html(value);
+            document.getElementById('CTimg1').src='/static/djoncharts/jpgs/' + meta_folder + '/' + ('00000' + value.toString()).slice(-5) + '.jpg';
+          }
+        });
+
+
+        $.ajax({
+          type: 'POST',
+          data: {'page_id':1,  'type': 0},
+          dataType: 'json',
+          success:function(data){
+            list = data['result']
+            console.log(list);
+            addHTML = "";
+            for(var i = 0; i < list.length; i++){
+              addHTML += ("<div class='item', " + "id=" + list[i][0] + "> ");
+              addHTML += ("<i class='heartbeat icon'></i> ");
+              addHTML += ("<div class='content' style='height: 40px'> ");
+              addHTML += ("<div class='header'>" + list[i][0] + "</div> ");
+              addHTML += ("<p style='display: none;'>" + list[i][1] + "<p> ");
+              addHTML += "</div></div>";
+            }
+            //console.log(addHTML);
+            document.getElementById('folders').innerHTML = addHTML;
+          }
+        });
+
+        $('div.ui.pagination.menu a.item').click(function(value){
+          console.log(value.currentTarget.innerText);
+          var cur_page = value.currentTarget.innerText;
+          $.ajax({
+            type: 'POST',
+            data: {'page_id':cur_page,  'type': 0},
+            dataType: 'json',
+            success:function(data){
+              list = data['result']
+              console.log(list);
+              addHTML = "";
+              for(var i = 0; i < list.length; i++){
+                addHTML += ("<div class='item', " + "id=" + list[i][0] + "> ");
+                addHTML += ("<i class='heartbeat icon'></i> ");
+                addHTML += ("<div class='content' style='height: 40px'> ");
+                addHTML += ("<div class='header'>" + list[i][0] + "</div> ");
+                addHTML += ("<p style='display: none;'>" + list[i][1] + "<p> ");
+                addHTML += "</div></div>";
+              }
+              //console.log(addHTML);
+              document.getElementById('folders').innerHTML = addHTML;
+            }
+          });
+        });
+
+
+        $("body").on("click", '.ui.middle.aligned.animated.divided.list div.item div.content div.header', function(value) {
+          //console.log(value);
+            let folder_name = value.currentTarget.innerText;
+            meta_folder = folder_name;
+            document.getElementById('CTimg0').src='/static/djoncharts/jpgs/' + folder_name + '/' + ('00000' + '1').slice(-5) + '.jpg';
+            myChart.clear();
+            centerChart.clear();
+            sectionChart.clear();
+            axisChart.clear();
+            valueChart.clear();
+            document.getElementById('begin_point').innerText = "";
+            document.getElementById('end_point').innerText   = "";
+          });
+
+        $("body").on("click", '.ui.middle.aligned.animated.divided.list div.item div.content', function(value) {
+            console.log(value);
+            file_num = value.currentTarget.childNodes[3].innerText;
+            $('#range-3').range({
+            min: 1,
+            max: file_num,
+            start: 1,
+              onChange: function(value) {
+                val = value;
+                $('#display-3').html(value);
+                document.getElementById('CTimg0').src='/static/djoncharts/jpgs/' + meta_folder + '/' + ('00000' + value.toString()).slice(-5) + '.jpg';
+              }
+            });
+
+            $('#range-4').range({
+               min: 1,
+               max: file_num,
+               start: 1,
+               onChange: function(value) {
+                 val = value;
+                 $('#display-4').html(value);
+                 document.getElementById('CTimg1').src='/static/djoncharts/jpgs/' + meta_folder + '/' + ('00000' + value.toString()).slice(-5) + '.jpg';
+                 document.getElementById('SegImg').src='/static/djoncharts/masks/' + meta_folder + '/' + ('000000' + value.toString()).slice(-6) + '.jpg';
+                 document.getElementById('HMImg').src='/static/djoncharts/heatmaps/' + meta_folder + '/' + ('000000' + value.toString()).slice(-5) + '.jpg';
+               }
+             });
+
+          });
+
+        $(".tabular.menu .item").tab();
+
+    });
+
+
+function get_direction(){
+  $.ajax({
+    type: 'POST',
+    data: {'x1':  document.getElementById('begin_point').innerText, 'x2':  document.getElementById('end_point').innerText, 'type':1},
+    dataType: 'json',
+    beforeSend:function () {
+        $("#myspin").text("");
+        var target = $("#myspin").get(0);
+        spinner.spin(target);//显示loading图标
+      },
+    success:function(data){
+      alert(data['result']);
+      spinner.spin();
+      $.getJSON('/static/djoncharts/data_centerline_ind_simple.json', function (data) {
+        var symbolSize = 0.5;
+        //console.log(data);
+        option = {
+        grid3D: {},
+        xAxis3D: {},
+        yAxis3D: {},
+        zAxis3D: {},
+        dataset: {
+            dimensions: [
+                'X',
+                'Y',
+                'Z',
+                'ind',
+            ],
+            source: data
+        },
+        series: [
+            {
+                type: 'scatter3D',
+                symbolSize: symbolSize,
+                encode: {
+                    x: 'X',
+                    y: 'Y',
+                    z: 'Z',
+                    tooltip: [0, 1, 2, 3, 4]
+                }
+            }
+            ]
+          };
+          sectionChart.setOption(option);
+        });
+
+    }
+  });
+}
+
+
+function get_centerline(){
+  console.log('/static/djoncharts/masks/' + meta_folder);
+    $.ajax({
+    type: 'POST',
+    data: {'id': meta_folder, 'type':2},
+    dataType: 'json',
+    beforeSend:function () {
+        $("#myspin").text("");
+        var target = $("#myspin").get(0);
+        spinner.spin(target);//显示loading图标
+      },
+    success:function(data){
+      alert(data['result']);
+      spinner.spin();
+
+    $.getJSON('/static/djoncharts/data_centerline_ind.json', function (data) {
+        var symbolSize = 0.5;
+        //console.log(data);
+        option = {
+        grid3D: {},
+        xAxis3D: {},
+        yAxis3D: {},
+        zAxis3D: {},
+        dataset: {
+            dimensions: [
+                'X',
+                'Y',
+                'Z',
+                'ind',
+            ],
+            source: data
+        },
+        series: [
+            {
+                type: 'scatter3D',
+                symbolSize: symbolSize,
+                encode: {
+                    x: 'X',
+                    y: 'Y',
+                    z: 'Z',
+                    tooltip: [0, 1, 2, 3, 4]
+                }
+            }
+        ]
+    };
+    centerChart.setOption(option);
+  });
+    }
+  });
+}
+
+
+function get_section(){
+
+  let data1 = [];
+  let data2 = [];
+  let data3 = [];
+  let data4 = [];
+  var xAxisData = [];
+
+  $.ajax({
+    type: 'POST',
+    data: {'id': meta_folder, 'type':3},
+    dataType: 'json',
+    beforeSend:function () {
+        $("#myspin").text("");
+        var target = $("#myspin").get(0);
+        spinner.spin(target);//显示loading图标
+      },
+    success:function(data){
+      alert(data['result']);
+      spinner.spin();
+      $.getJSON('/static/djoncharts/section_value.json', function (data) {
+        console.log(data);
+        for (var i = 0; i < data.length; i++) {
+          xAxisData.push('' + i);
+          data3.push(data[i][1]);
+          data4.push(data[i][0]);
+        }
+        optionmain = {
+          title: {
+              text: '主动脉影像值特征'
+          },
+          legend: {
+              data: ['主动脉影像值均值', '主动脉影像值方差'],
+              align: 'left'
+          },
+          tooltip: {},
+          xAxis: {
+              data: xAxisData,
+              silent: false,
+              splitLine: {
+                  show: false
+              }
+          },
+          yAxis: {
+          },
+          series: [{
+              name: '主动脉影像值方差',
+              type: 'bar',
+              data: data3,
+              animationDelay: function (idx) {
+                  return idx * 10;
+              }
+          }, {
+              name: '主动脉影像值均值',
+              type: 'bar',
+              data: data4,
+              animationDelay: function (idx) {
+                  return idx * 10 + 100;
+              }
+          }],
+          animationEasing: 'elasticOut',
+          animationDelayUpdate: function (idx) {
+              return idx * 5;
+          }
+        };
+        valueChart.setOption(optionmain);
+      });
+
+
+      $.getJSON('/static/djoncharts/section_axis.json', function (data) {
+
+          for (var i = 0; i < data.length; i++) {
+
+            data1.push(data[i][1]);
+            data2.push(data[i][0]);
+          }
+          optionmain = {
+            title: {
+                text: '主动脉长短轴特征'
+            },
+            legend: {
+                data: ['主动脉长轴', '主动脉短轴'],
+                align: 'left'
+            },
+            tooltip: {},
+            xAxis: {
+                data: xAxisData,
+                silent: false,
+                splitLine: {
+                    show: false
+                }
+            },
+            yAxis: {
+            },
+            series: [{
+                name: '主动脉长轴',
+                type: 'bar',
+                data: data1,
+                animationDelay: function (idx) {
+                    return idx * 10;
+                }
+            }, {
+                name: '主动脉短轴',
+                type: 'bar',
+                data: data2,
+                animationDelay: function (idx) {
+                    return idx * 10 + 100;
+                }
+            }],
+            animationEasing: 'elasticOut',
+            animationDelayUpdate: function (idx) {
+                return idx * 5;
+            }
+          };
+          axisChart.setOption(optionmain);
+        }
+      );
+
+    }
+  });
+}
+
+
+centerChart.on('click', function (params) {
+  var begin = document.getElementById('begin_point');
+  var end   = document.getElementById('end_point');
+  if (begin.innerText == '') {
+    begin.innerText = params.value[3];
+    //console.log(params.value);
+  }else{
+    end.innerText   = params.value[3];
+  }
+  //alert(begin.text);
+  //alert(params.value);
+});
+
+axisChart.on('click', function (params){
+  var cur_ind = params.dataIndex;
+  console.log(cur_ind);
+  document.getElementById('SectImg').src='/static/djoncharts/sections/' + ('00000' + cur_ind.toString()).slice(-5) + '.jpg';
+  $('#mymodal').modal('show');
+});
+
+valueChart.on('click', function (params){
+  var cur_ind = params.dataIndex;
+  console.log(cur_ind);
+  document.getElementById('SectImg').src='/static/djoncharts/sections/' + ('00000' + cur_ind.toString()).slice(-5) + '.jpg';
+  $('#mymodal').modal('show');
+});
+
+    </script>
+</body>
