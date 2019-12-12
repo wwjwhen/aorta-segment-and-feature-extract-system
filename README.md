@@ -42,6 +42,9 @@ numpy==1.17.4
 
 matlab==R2018a
 
+
+## 系统运行方法
+
 可用conda创建python36的环境，然后conda activate python36
 
 在python36的环境里进行进入myechartsite目录，运行python manage.py runserver
